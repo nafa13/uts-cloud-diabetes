@@ -11,11 +11,11 @@ jobs:
     - name: Deploy to Server via SSH
       uses: appleboy/ssh-action@master
       with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USERNAME }}
+        host: 13.210.69.5          # <-- TULIS LANGSUNG IP-NYA DI SINI
+        username: ubuntu           # <-- TULIS LANGSUNG UBUNTU DI SINI
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          cd /home/${{ secrets.EC2_USERNAME }}
+          cd /home/ubuntu          # <-- UBAH JUGA DI SINI JADI UBUNTU
           # Clone repo jika belum ada, atau update jika sudah ada
           if [ ! -d "uts-cloud-diabetes" ]; then
             git clone https://github.com/nafa13/uts-cloud-diabetes.git
