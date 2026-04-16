@@ -10,29 +10,33 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # ==========================================
-# FUNGSI KONEKSI KE AWS RDS
+# FUNGSI KONEKSI KE AWS RDS (AUTO-SWITCH: LOKAL & EC2)
 # ==========================================
+DB_HOST = os.environ.get('DB_HOST', 'db-diabetes-naufal.cpw6wmmca51b.ap-southeast-2.rds.amazonaws.com')
+DB_USER = os.environ.get('DB_USER', 'adminnaufal')
+DB_PASS = os.environ.get('DB_PASSWORD', 'Fal130404')
+DB_NAME = 'db-diabetes-naufal'
+
 def get_db_connection():
     return mysql.connector.connect(
-        host=os.environ.get('DB_HOST'),
-        user=os.environ.get('DB_USER'),
-        password=os.environ.get('DB_PASSWORD'),
-        database='diabetes_db'
+        host=DB_HOST,
+        user=DB_USER,
+        password=DB_PASS,
+        database=DB_NAME
     )
 
 def init_db():
     try:
-        # Konek ke server MySQL awal untuk bikin database
         db = mysql.connector.connect(
-            host=os.environ.get('DB_HOST'),
-            user=os.environ.get('DB_USER'),
-            password=os.environ.get('DB_PASSWORD')
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASS
         )
         cursor = db.cursor()
-        cursor.execute("CREATE DATABASE IF NOT EXISTS diabetes_db")
-        cursor.execute("USE diabetes_db")
+        # FIX: Gunakan backtick (`) untuk nama database yang mengandung tanda strip (-)
+        cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{DB_NAME}`")
+        cursor.execute(f"USE `{DB_NAME}`")
         
-        # Bikin tabel
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS laporan (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -84,7 +88,6 @@ def submit():
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
-            # Perhatikan: MySQL pakai %s, bukan ? seperti SQLite
             cursor.execute("INSERT INTO laporan (nama, kadar_gula, keluhan, file_url, risiko) VALUES (%s, %s, %s, %s, %s)",
                            (nama, kadar_gula, keluhan, file_url, risiko))
             conn.commit()
@@ -102,7 +105,6 @@ def dashboard():
     
     try:
         conn = get_db_connection()
-        # dictionary=True agar hasilnya bisa dipanggil pakai nama kolom di HTML (seperti row.nama)
         cursor = conn.cursor(dictionary=True) 
         
         if search:
