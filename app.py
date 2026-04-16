@@ -12,10 +12,10 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # ==========================================
 # FUNGSI KONEKSI KE AWS RDS (AUTO-SWITCH: LOKAL & EC2)
 # ==========================================
-DB_HOST = os.environ.get('DB_HOST', 'db-diabetes-naufal.cpw6wmmca51b.ap-southeast-2.rds.amazonaws.com')
+DB_HOST = os.environ.get('DB_HOST', 'database-1.cpw6wmmca51b.ap-southeast-2.rds.amazonaws.com')
 DB_USER = os.environ.get('DB_USER', 'adminnaufal')
 DB_PASS = os.environ.get('DB_PASSWORD', 'Fal130404')
-DB_NAME = 'db-diabetes-naufal'
+DB_NAME = 'database-1'
 
 def get_db_connection():
     return mysql.connector.connect(
