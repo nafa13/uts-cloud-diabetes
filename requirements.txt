@@ -1,5 +1,3 @@
 Flask>=3.0.0
-mysql-connector-python==8.0.33
-azure-storage-blob==12.16.0
 Werkzeug>=3.0.0
-six
+mysql-connector-python>=8.0.0
