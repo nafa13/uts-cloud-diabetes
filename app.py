@@ -15,7 +15,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 DB_HOST = os.environ.get('DB_HOST', 'database-1.cpw6wmmca51b.ap-southeast-2.rds.amazonaws.com')
 DB_USER = os.environ.get('DB_USER', 'adminnaufal')
 DB_PASS = os.environ.get('DB_PASSWORD', 'Fal130404')
-DB_NAME = 'database-1'
+DB_NAME = 'db_diabetes_uts'
 
 def get_db_connection():
     return mysql.connector.connect(
