@@ -33,7 +33,7 @@ def init_db():
             password=DB_PASS
         )
         cursor = db.cursor()
-        # FIX: Gunakan backtick (`) untuk nama database yang mengandung tanda strip (-)
+        # FIX: Gunakan backtick (`) untuk nama database yang mengandung tanda strip (-) atau underscore
         cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{DB_NAME}`")
         cursor.execute(f"USE `{DB_NAME}`")
         
