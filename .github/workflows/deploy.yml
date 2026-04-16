@@ -1,54 +1,46 @@
-name: Deploy ke AWS EC2
+name: CI/CD Pipeline Web Diabetes
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main # Otomatis jalan setiap ada push ke branch main
 
 jobs:
   deploy:
+    name: Deploy to Amazon EC2
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-    - name: Deploy to Server via SSH
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: 13.210.69.5
-        username: ubuntu
-        key: ${{ secrets.EC2_SSH_KEY }}
-        port: 22
-        script: |
-          cd /home/ubuntu
-
-          # Clone / update repo
-          if [ ! -d "uts-cloud-diabetes" ]; then
-            git clone https://github.com/nafa13/uts-cloud-diabetes.git
-          fi
-          cd uts-cloud-diabetes
-          git pull origin main
-
-          # Stop & hapus container lama
-          sudo docker stop web-diabetes || true
-          sudo docker rm web-diabetes || true
-
-          # Hapus image lama (biar tidak cache)
-          sudo docker rmi app-diabetes || true
-
-          # Build ulang image
-          sudo docker build -t app-diabetes .
-
-          # Jalankan container baru
-          sudo docker run -d -p 5000:5000 \
-            --name web-diabetes \
-            --restart always \
-            -e DB_HOST=${{ secrets.DB_HOST }} \
-            -e DB_USER=${{ secrets.DB_USER }} \
-            -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-            -e DB_NAME=${{ secrets.DB_NAME }} \
-            -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
-            -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
-            -e AWS_REGION=ap-southeast-1 \
-            -e S3_BUCKET_NAME=bucket-diabetes-nafal \
-            app-diabetes
+      - name: Execute SSH to EC2 & Deploy Docker
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/uts-cloud-diabetes
+            
+            echo "1. Menarik kode terbaru dari GitHub..."
+            git pull origin main
+            
+            echo "2. Menghapus container yang lama..."
+            sudo docker rm -f web-diabetes || true
+            
+            echo "3. Merakit ulang Docker Image..."
+            sudo docker build -t app-diabetes .
+            
+            # (baris atasnya biarkan sama)
+            echo "4. Menjalankan aplikasi web..."
+            sudo docker run -d -p 5000:5000 \
+              -e DB_HOST=database-1.cpw6wmmca51b.ap-southeast-2.rds.amazonaws.com \
+              -e DB_USER=adminnaufal \
+              -e DB_PASSWORD=Fal130404 \
+              -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
+              -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
+              -e AWS_REGION=ap-southeast-1 \
+              -e S3_BUCKET_NAME=bucket-diabetes-nafal \
+              --name web-diabetes app-diabetes
+            echo "✅ Deployment CI/CD Berhasil!"
